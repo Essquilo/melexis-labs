@@ -1,1 +1,1 @@
-define worklib /home/student/design/lab1/INCA_libs/worklib
+define worklib ./INCA_libs/worklib
