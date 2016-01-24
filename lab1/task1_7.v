@@ -32,8 +32,11 @@ param_shift_reg #(.width(width)) reg_inst1(.clk(clk),
                                            .data_out(data_out) );
 initial begin
   clk = 0;
-  forever #(period/2) clk = ~clk;
+  repeat (20) begin
+  #(period/2) clk = ~clk;
+  end
 end
+
 initial begin
   rst_n = 0;
   data_in = 0;
@@ -46,7 +49,7 @@ initial begin
   repeat(3) @(negedge clk);
   mode = 2'b11;
   repeat(7) @(negedge clk);
-  $finish;  
+  $finish();  
 end  
 endmodule
 
