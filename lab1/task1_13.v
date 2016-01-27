@@ -28,9 +28,13 @@ johnson_latch #(.WIDTH(WIDTH)) reg_inst1(.clk(clk),
                    .out(jcnt_out)
                    );
 
-always @(jcnt_out) begin
-    if(!(jcnt_out[0]^^jcnt_out[WIDTH-1])) begin
+always @(rst_n, data_in, jcnt_out) begin
+if(!rst_n) begin
+    data_out<=0;
+end else begin
+    if(!(jcnt_out[0]^jcnt_out[WIDTH-1])) begin
 	data_out <= data_in;
+    end
     end
 end
 
@@ -54,20 +58,22 @@ initial begin
 end
 initial begin
     rst_n = 0;
-    in = 8;
-    @(negedge clk);
-    @(negedge clk) rst_n = 1;
-    @(negedge clk); 
-    @(negedge clk); 
     in = 4;
+    @(negedge clk) rst_n = 1;
+    @(negedge clk);
+    @(negedge clk); 
+    in = 1;
+    @(negedge clk); 
+    in=9;
+    @(negedge clk);
+    in=3; 
+    @(negedge clk); 
+    in=13;
     @(negedge clk); 
     @(negedge clk); 
-    in = 6;
+    in=5;
     @(negedge clk); 
-    in=2;
-    @(negedge clk); 
-    @(negedge clk); 
-    @(negedge clk); 
+    in = 2;
     $finish;  
 end
 endmodule
