@@ -1,5 +1,5 @@
 list:
-	echo "task1_5, task1_7, task1_10, task1_11, task1_12, task1_13"
+	echo "task1_5, task1_7, task1_10, task1_11, task1_12, task1_13, task1_14"
 task1_5: clean libs
 	ncvlog -message -work worklib -v task1_5.v
 	ncelab -message -access w -neverwarn -snapshot verilog_snapshot worklib.reg_8bit_tb:module
@@ -24,6 +24,10 @@ task1_13: clean libs
 	ncvlog -message -work worklib -v task1_13.v
 	ncelab -message -access w -neverwarn -snapshot verilog_snapshot worklib.complex_latch_tb:module
 	ncsim -message -gui worklib.verilog_snapshot:module
+task1_14: clean libs
+	ncvlog -message -work worklib -v task1_14.v
+	ncelab -message -access w -neverwarn -snapshot verilog_snapshot worklib.pipeline_tb:module
+	ncsim -message -gui worklib.verilog_snapshot:module
 libs:
 	mkdir ./INCA_libs
 	mkdir ./INCA_libs/worklib
@@ -31,4 +35,3 @@ clean:
 	rm -rf core *.key *.log* *.out *.df *.dsn *.trn *.shm *.rpt .cov *.cmd* INCA_libs
 .PHONY: libs clean
 .IGNORE: libs
-
