@@ -1,0 +1,16 @@
+#Cadence-specific
+/INCA_libs
+/screenshots
+/waves.shm
+/.simvision
+*.log
+*.key
+
+#Quartus
+*.bak
+*.txt
+*.qpf
+*.qsf
+/incremental_db
+/output_files
+/db
