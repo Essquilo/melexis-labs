@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module subtractor(i_op1, i_op2, i_borrow, o_res, o_borrow);
+module substractor(i_op1, i_op2, i_borrow, o_res, o_borrow);
 parameter WIDTH = 4;
 input wire [WIDTH-1:0] i_op1, i_op2;
 input wire i_borrow;
@@ -44,7 +44,7 @@ wire o_borrow;
 reg [WIDTH:0] control_res;
 integer i, j, error_count;
 
-subtractor #(.WIDTH(WIDTH)) inst(.i_op1(op1),
+substractor #(.WIDTH(WIDTH)) inst(.i_op1(op1),
 			  .i_op2(op2),
 			  .i_borrow(i_borrow), 
 			  .o_res(res),
