@@ -5,6 +5,7 @@
 /.simvision
 *.log
 *.key
+hal*
 
 #Quartus
 *.bak
