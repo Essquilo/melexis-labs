@@ -1,5 +1,9 @@
 list:
-	@echo ""
+	@echo " task available: vending_machine, traffic_light, test_delay"
+
+vending_machine: target=vending_machine.v
+vending_machine: entity=tb_vending_machine
+vending_machine: sim
 
 traffic_light: target=traffic_light.v parametrized_delay.v
 traffic_light: entity=tb_traffic_light

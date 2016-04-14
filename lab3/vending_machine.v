@@ -8,6 +8,7 @@ module vending_machine(
     );
 
 //parameters for product types, prices and width of product code
+parameter INIT_VALUES = 10;
 parameter PRODUCTS = 4;
 parameter integer PRODUCT_PRICES [PRODUCTS-1:0] = '{100, 200, 300, 150};
 localparam PRODUCT_WIDTH = $clog2(PRODUCTS);
@@ -50,6 +51,8 @@ always @(posedge clk or negedge i_rst_n) begin
 		o_change_strobe<=0;
 		o_give_strobe<=0;
 		o_no_change<=0;
+		for(i=0; i<CURRENCIES; i=i+1)
+			currency_amount[i] <= INIT_VALUES;
 	end
 	else begin
 		o_change_strobe<=0;
@@ -84,6 +87,7 @@ always @(posedge clk or negedge i_rst_n) begin
 		ENOUGH_MONEY: begin
 			if(inserted_amount==PRODUCT_PRICES[o_product]) begin
 				state<=GIVE_PRODUCT;
+				o_give_strobe<=1;
 			end
 			else begin
 				state<=CHANGE_NEEDED;
@@ -91,16 +95,17 @@ always @(posedge clk or negedge i_rst_n) begin
 		end
 		CHANGE_NEEDED: begin
 			if (i_currency_strobe) begin
-				for(i = CURRENCIES; i>0;i = i-1)
-					if(CURRENCY_VALUES[i-1]<=inserted_amount-PRODUCT_PRICES[o_product] && currency_amount[i-1]>0) begin
-						inserted_amount<=inserted_amount - CURRENCY_VALUES[i-1];
-						currency_amount[i-1] = currency_amount[i-1]-1;
-						o_change<=CURRENCY_VALUES[i-1];
+				for(i = 0; i < CURRENCIES;i = i+1)
+					if(CURRENCY_VALUES[i]<=inserted_amount-PRODUCT_PRICES[o_product] && currency_amount[i]>0) begin
+						inserted_amount<=inserted_amount - CURRENCY_VALUES[i];
+						o_change<=i;
 					end
-		end
+			end
+		state<=GIVE_CHANGE;
 		end
 		GIVE_CHANGE: begin
 			if(inserted_amount<previous_amount)begin
+				currency_amount[o_change]<=currency_amount[o_change] - 1;
 				o_change_strobe<=1;
 				state<=ENOUGH_MONEY;
 			end 
@@ -110,11 +115,87 @@ always @(posedge clk or negedge i_rst_n) begin
 		end
 		NO_CHANGE: begin
 			o_no_change<=1;
+			o_give_strobe<=1;
+			state<=GIVE_PRODUCT;
 		end
 		GIVE_PRODUCT: begin
-			o_give_strobe<=1;
+			state<=IDLE;
+			o_busy<=0;
+		end
+		default: begin
+			state<=IDLE;
 		end
 		endcase
+	end
+end
+endmodule
+
+module tb_vending_machine;
+parameter PRODUCTS = 4;
+parameter CURRENCIES = 8;
+wire busy, change_strobe, no_change, give_strobe;
+wire [$clog2(PRODUCTS)-1:0] product;
+wire [$clog2(CURRENCIES)-1:0] change; 
+
+reg clk, rst_n, product_strobe, currency_strobe;
+reg [$clog2(PRODUCTS)-1:0] product_code;
+reg [$clog2(CURRENCIES)-1:0] currency_code; 
+vending_machine inst (
+	.clk(clk),
+	.i_rst_n(rst_n),
+  	.i_product_code(product_code), 
+  	.i_product_strobe(product_strobe),
+   	.i_currency_code(currency_code), 
+   	.i_currency_strobe(currency_strobe), 
+  	.o_busy(busy), 
+  	.o_change(change), 
+  	.o_change_strobe(change_strobe), 
+  	.o_no_change(no_change),
+    .o_product(product), 
+    .o_give_strobe(give_strobe)
+    );
+integer i;
+
+initial begin
+	//initializing
+	clk = 0;
+	rst_n = 0;
+	product_strobe = 0;
+	currency_strobe = 0;
+	#10 clk = 1;
+	#10 clk = 0;
+	rst_n=1;
+
+	//some empty clk
+	#10 clk = 1;
+	#10 clk = 0;
+	#10 clk = 1;
+	#10 clk = 0;
+
+	//request for product
+	product_code = 3;
+	product_strobe = 1;
+	#10 clk = 1;
+	#10 clk = 0;
+	#10 clk = 1;
+	#10 clk = 0;
+
+	//giving money
+	currency_code = 4;
+	currency_strobe = 1;
+	#10 clk = 1;
+	#10 clk = 0;
+	#10 clk = 1;
+	#10 clk = 0;
+
+	//one more
+	currency_code = 6;
+	currency_strobe = 1;
+
+	//to ensure that change withdrawal algorithm works
+	repeat(10) begin
+		#10 clk = 1;
+		#10 clk = 0;
 	end
 end
 endmodule
