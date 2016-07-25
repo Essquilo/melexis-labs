@@ -12,6 +12,11 @@ hal*
 *.txt
 *.qpf
 *.qsf
+*.qws
 */incremental_db
 */output_files
 */db
+
+#Modelsim
+*/simulation/
+*.do
