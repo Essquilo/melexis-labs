@@ -4,6 +4,7 @@ parameter reg DEBUG = 1;
 parameter CLOCK_PERIOD = 20;
 parameter PRODUCTS = 4;
 parameter CURRENCIES = 8;
+parameter INIT_CURRENCIES_AMOUNT = 100;
 wire busy, ready_to_receive, change_strobe, no_change, give_strobe;
 wire [$clog2(PRODUCTS)-1:0] product;
 wire [$clog2(CURRENCIES)-1:0] change; 
@@ -11,20 +12,20 @@ wire [$clog2(CURRENCIES)-1:0] change;
 reg clk, rst_n, product_strobe, currency_strobe;
 reg [$clog2(PRODUCTS)-1:0] product_code;
 reg [$clog2(CURRENCIES)-1:0] currency_code; 
-vending_machine inst (
+vending_machine #(.INIT_CURRENCIES_AMOUNT(INIT_CURRENCIES_AMOUNT)) inst (
 	.clk(clk),
 	.i_rst_n(rst_n),
   	.i_product_code(product_code), 
   	.i_product_strobe(product_strobe),
-   .i_currency_code(currency_code), 
-   .i_currency_strobe(currency_strobe), 
+    .i_currency_code(currency_code), 
+    .i_currency_strobe(currency_strobe), 
   	.o_busy(busy), 
 	.o_ready_to_receive(ready_to_receive), 
   	.o_change(change), 
   	.o_change_strobe(change_strobe), 
   	.o_no_change(no_change),
-   .o_product(product), 
-   .o_give_strobe(give_strobe)
+    .o_product(product), 
+    .o_give_strobe(give_strobe)
     );
 integer i;
 
@@ -97,6 +98,8 @@ begin
 	//machine assumes that the price was exact, checking if it's right
 		if(!total_money_given==price)
 			$display("Error, the price was not exact, expected %dkop given", total_money_given-price);
+		else 
+			$display("The price is equal with the money given");
 	end 
 	else begin
 	//we receive change until we have the product
@@ -109,8 +112,11 @@ begin
 					$display("Received %dkop, %dkop total", inst.CURRENCY_VALUES[change], total_money_received);
 			end
 		end
-		if(total_money_received!=total_money_given-price&&!no_change)
-			$display("Error, the change is not exact, expected %dkop given, actually %dkop given", total_money_given-price, total_money_received);
+		if(total_money_received!=total_money_given-price)
+			if(!no_change)
+				$display("Error, the change is not exact, expected %dkop given, actually %dkop given", total_money_given-price, total_money_received);
+			else
+				$display("The machine does not have enough change");
 	end
 	
 	@(negedge clk);

@@ -16,7 +16,7 @@ module vending_machine(
    );
 
 //parameters for initial load of money
-parameter INIT_CURRENCIES_AMOUNT = 10;
+parameter INIT_CURRENCIES_AMOUNT = 100;
 
 //must be bigger than 9 to fit max currency value
 parameter WIDTH_OF_MONEY = 16;
