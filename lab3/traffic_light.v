@@ -24,6 +24,7 @@ parameter IDLE = 0, ST_RED = 1, ST_YELLOW1 = 2,  ST_GREEN = 3, ST_YELLOW2 = 4;
 reg [2:0] state;
 assign enable_module_set = count | (state==IDLE);
 always @(state) begin
+	enable_count<=1;
 	o_yellow = 0;
 	o_green = 0;
 	o_red = 0;
@@ -48,11 +49,9 @@ always @(state) begin
 		delay_module = RED;
 	endcase
 end
-
 always @(posedge clk or negedge i_rst_n) begin
 	if (!i_rst_n) begin
 		state <= IDLE;
-		enable_count<=1;
 	end
 	else begin
 		case(state)
