@@ -13,10 +13,16 @@ hal*
 *.qpf
 *.qsf
 *.qws
+*.rpt
 */incremental_db
 */output_files
 */db
 
 #Modelsim
+*/work
+*.mti
+*.mpf
 */simulation/
 *.do
+*.vstf
+*.wlf
