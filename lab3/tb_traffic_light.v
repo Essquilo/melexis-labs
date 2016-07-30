@@ -17,15 +17,17 @@ traffic_light #(.YELLOW(YELLOW), .GREEN(GREEN), .RED(RED)) inst (
 	.o_red(red)
 	);
 
-always #(CLOCK_PERIOD/2) clk = ~clk;
-
 initial begin
 	clk = 0;
+	forever #(CLOCK_PERIOD/2) clk = ~clk;
+end
+
+initial begin
 	count_y = 0;
 	count_r = 0;
 	count_g = 0;
 	rst_n = 0;
-	#(CLOCK_PERIOD/2) rst_n = 1;
+	@(negedge clk) rst_n = 1;
 	//there is additional delay for every state - it's needed to set up the counting module
 	for(i = 0;i < 2*(YELLOW+1) + GREEN + 1 + RED + 1 + 1; i = i+1) begin
 		case (1'b1)
@@ -37,7 +39,7 @@ initial begin
 				count_r = count_r+1;
 			default:;
 		endcase
-		#(CLOCK_PERIOD);
+		@(negedge clk);
 	end
 	if(count_y!=2*(YELLOW+1))
 		$display("Error, expected %d yellow ticks, got %d", 2*(YELLOW+1), count_y);
@@ -45,6 +47,6 @@ initial begin
 		$display("Error, expected %d green ticks, got %d", GREEN+1, count_g);
 	if(count_r!=RED+1)
 		$display("Error, expected %d red ticks, got %d", RED+1, count_r);
-	$stop();
+	$finish();
 end
 endmodule

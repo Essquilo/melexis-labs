@@ -6,8 +6,8 @@ parameter RED = 1;
 //max of three
 localparam DELAY_WIDTH = $clog2((YELLOW>GREEN?(YELLOW>RED?YELLOW:RED):(GREEN>RED?GREEN:RED)));
 input clk, i_rst_n;
-wire enable_module_set,  count;
-reg enable_count;
+wire enable_module_set,  counter_overflow;
+reg enable_count = 1;
 output reg o_yellow, o_green, o_red;
 reg [DELAY_WIDTH-1: 0] delay_module;
 
@@ -17,14 +17,13 @@ delay #(.WIDTH(DELAY_WIDTH)) _delay(
 	.i_count_enbl(enable_count),
 	.i_module(delay_module),
 	.i_set_module_enbl(enable_module_set),
-	.o_cnt(count)
+	.o_cnt(counter_overflow)
 	);
 	
 parameter IDLE = 0, ST_RED = 1, ST_YELLOW1 = 2,  ST_GREEN = 3, ST_YELLOW2 = 4;
 reg [2:0] state;
-assign enable_module_set = count | (state==IDLE);
+assign enable_module_set = counter_overflow | (state==IDLE);
 always @(state) begin
-	enable_count<=1;
 	o_yellow = 0;
 	o_green = 0;
 	o_red = 0;
@@ -59,19 +58,19 @@ always @(posedge clk or negedge i_rst_n) begin
 			state<=ST_RED;
 		end
 		ST_RED: 
-			if(count) begin
+			if(counter_overflow) begin
 				state <= ST_YELLOW1;
 			end
 		ST_YELLOW1: 
-			if(count) begin
+			if(counter_overflow) begin
 				state <= ST_GREEN;
 			end
 		ST_GREEN: 
-			if(count) begin
+			if(counter_overflow) begin
 				state <= ST_YELLOW2;
 			end
 		ST_YELLOW2:
-			if(count) begin
+			if(counter_overflow) begin
 				state <= ST_RED;
 			end
 		endcase

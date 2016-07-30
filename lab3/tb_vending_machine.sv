@@ -37,11 +37,15 @@ integer price;
 reg error_flag;
 
 initial begin
+	clk = 0;
+	forever #(CLOCK_PERIOD/2) clk = ~clk;
+end
+
+initial begin
 test_count = 0;
 error_count = 0;
-clk = 0;
 rst_n = 0;
-#(CLOCK_PERIOD/2) rst_n = 1;
+@(negedge clk) rst_n = 1;
 repeat (100) begin
 	test_count = test_count+1;
 	imitate_user();
@@ -49,10 +53,8 @@ end
 $display("===============TEST SUMMARY===============");
 $display("Test executed: %d; passed: %d; failed: %d.", test_count, test_count-error_count, error_count);
 $display("===============END  SUMMARY===============");
-$stop();
+$finish();
 end
-
-always #(CLOCK_PERIOD/2) clk = ~clk;
 
 task imitate_user();
 begin
@@ -74,8 +76,10 @@ begin
 	
 	@(negedge clk);
 	//checking if it is actually busy
-	if(!busy)
+	if(!busy) begin
 		$display("Error, the FSM hasn't switched");
+		error_flag = 1;
+	end
 	product_strobe = 0;	
 	while(total_money_given<price) begin	
 		@(negedge clk);
@@ -96,9 +100,10 @@ begin
 	@(negedge clk);
 	if(give_strobe) begin
 	//machine assumes that the price was exact, checking if it's right
-		if(!total_money_given==price)
+		if(!total_money_given==price) begin
 			$display("Error, the price was not exact, expected %dkop given", total_money_given-price);
-		else 
+			error_flag = 1;
+		end else 
 			$display("The price is equal with the money given");
 	end 
 	else begin
@@ -113,15 +118,18 @@ begin
 			end
 		end
 		if(total_money_received!=total_money_given-price)
-			if(!no_change)
+			if(!no_change) begin
 				$display("Error, the change is not exact, expected %dkop given, actually %dkop given", total_money_given-price, total_money_received);
-			else
+				error_flag = 1;
+			end else
 				$display("The machine does not have enough change");
 	end
 	
 	@(negedge clk);
-	if(busy)
+	if(busy) begin
 		$display("Error, the FSM hasn't switched off");
+		error_flag = 1;
+		end
 	if(error_flag) begin
 		error_count = error_count + 1;
 		$display("TEST#%d EXECUTED WITH ERROR", test_count);
