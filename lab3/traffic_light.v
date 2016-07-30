@@ -6,8 +6,8 @@ parameter RED = 1;
 //max of three
 localparam DELAY_WIDTH = $clog2((YELLOW>GREEN?(YELLOW>RED?YELLOW:RED):(GREEN>RED?GREEN:RED)));
 input clk, i_rst_n;
-wire enable_module_set,  counter_overflow;
-reg enable_count = 1;
+wire enable_module_set, counter_overflow, enable_count;
+assign enable_count = 1;
 output reg o_yellow, o_green, o_red;
 reg [DELAY_WIDTH-1: 0] delay_module;
 
